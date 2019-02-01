@@ -1,0 +1,9 @@
+{
+  "name": "safemirror",
+  "version": "0.0.0",
+  "main": "safemirror.js",
+  "author": "risonakamo",
+  "dependencies": {
+    "glob": "^7.1.3"
+  }
+}
