@@ -12,12 +12,10 @@ function main()
     var filehandler=new FileHandler;
 
     glob(`${testsrc}/${testfilter}`,(err,files)=>{
-        console.log(files);
         filehandler.recieveFiles(files,"srcfiles");
     });
 
     glob(`${testdest}/${testfilter}`,(err,files)=>{
-        console.log(files);
         filehandler.recieveFiles(files,"destfiles");
     });
 }
@@ -48,7 +46,22 @@ class FileHandler
     //function executes once all async file recieves are done
     filesReady()
     {
-        console.log("gomegalul");
+        var srcFilesSet=new Set(this.filePaths.srcfiles.map((x,i)=>{
+            return path.basename(x);
+        }));
+
+        //determine which files are not source files and shuold be moved away
+        var moveOutDestFiles=[];
+        var destfiles=this.filePaths.destfiles;
+        for (var x=0,l=destfiles.length;x<l;x++)
+        {
+            if (!srcFilesSet.has(path.basename(destfiles[x])))
+            {
+                moveOutDestFiles.push(destfiles[x]);
+            }
+        }
+
+        console.log(moveOutDestFiles);
     }
 }
 
