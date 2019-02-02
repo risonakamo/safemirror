@@ -75,11 +75,10 @@ class FileHandler
 
         if (moveOutDestFiles.length)
         {
-            console.log(moveOutDestFiles);
             this.handleMoveOutFiles(moveOutDestFiles);
         }
 
-        console.log(this.filePaths);
+        this.mainCopyTransfer();
     }
 
     //move files into delete folder of destpath
@@ -90,15 +89,45 @@ class FileHandler
             fs.mkdirSync(`${destpath}/delete`);
         }
 
-        for (var x=0,l=files.length;x<l;x++)
-        {
-            fs.rename(files[x],`${destpath}/delete/${path.basename(files[x])}`,()=>{});
-        }
+        console.log("moving...");
+
+        files.forEach((x,i)=>{
+            var bname=path.basename(x);
+            fs.rename(x,`${destpath}/delete/${bname}`,(err)=>{
+                console.log(bname);
+            });
+        });
     }
 
+    //copy all srcfiles in filePaths to the destination
     mainCopyTransfer()
     {
+        console.log("copying...");
+        var srcfiles=this.filePaths.srcfiles;
 
+        srcfiles.forEach((x)=>{
+            var bname=path.basename(x);
+            fs.copyFile(x,`${destpath}/${bname}`,fs.constants.COPYFILE_EXCL,
+                (err)=>{
+                    if (err)
+                    {
+                        if (err.code=="EEXIST")
+                        {
+                            console.log(`${bname} (already exist)`);
+                        }
+
+                        else
+                        {
+                            console.log(`${bname} (err)`);
+                        }
+
+                        return;
+                    }
+
+                    console.log(bname);
+                }
+            );
+        });
     }
 }
 
