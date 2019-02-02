@@ -66,17 +66,18 @@ class FileHandler
     filesReady()
     {
         var srcFilesSet=new Set(this.filePaths.srcfiles.map((x,i)=>{
-            return path.basename(x);
+            this.filePaths.srcfiles[i]={path:x,base:path.basename(x)};
+            return this.filePaths.srcfiles[i].base;
         }));
-
-        this.totalFileActions=this.filePaths.srcfiles.length;
 
         //determine which files are not source files and shuold be moved away
         var moveOutDestFiles=[];
         var destfiles=this.filePaths.destfiles;
         for (var x=0,l=destfiles.length;x<l;x++)
         {
-            if (!srcFilesSet.has(path.basename(destfiles[x])))
+            destfiles[x]={path:destfiles[x],base:path.basename(destfiles[x])};
+
+            if (!srcFilesSet.has(destfiles[x].base))
             {
                 moveOutDestFiles.push(destfiles[x]);
             }
@@ -93,17 +94,14 @@ class FileHandler
     //move files into delete folder of destpath
     handleMoveOutFiles(files)
     {
-        this.totalFileActions+=files.length;
         if (!fs.existsSync(`${destpath}/delete`))
         {
             fs.mkdirSync(`${destpath}/delete`);
         }
 
         files.forEach((x,i)=>{
-            var bname=path.basename(x);
-            fs.rename(x,`${destpath}/delete/${bname}`,(err)=>{
-                console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname} (moved)`);
-                this.currentFileAction++;
+            fs.rename(x.path,`${destpath}/delete/${x.base}`,(err)=>{
+                console.log(`${x.base} moved`);
             });
         });
     }
@@ -114,27 +112,24 @@ class FileHandler
         var srcfiles=this.filePaths.srcfiles;
 
         srcfiles.forEach((x)=>{
-            var bname=path.basename(x);
-            fs.copyFile(x,`${destpath}/${bname}`,fs.constants.COPYFILE_EXCL,
+            fs.copyFile(x.path,`${destpath}/${x.base}`,fs.constants.COPYFILE_EXCL,
                 (err)=>{
                     if (err)
                     {
                         if (err.code=="EEXIST")
                         {
-                            console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname} (already exist)`);
-                            this.currentFileAction++;
+                            console.log(`${x.base} already exist`);
                         }
 
                         else
                         {
-                            console.log(`${bname} (err)`);
+                            console.log(`${x.base} err`);
                         }
 
                         return;
                     }
 
-                    console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname}`);
-                    this.currentFileAction++;
+                    console.log(`${x.base} copied`);
                 }
             );
         });
