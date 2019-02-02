@@ -4,13 +4,13 @@ const program=require("commander");
 const fs=require("fs");
 const logUpdate=require("log-update");
 
-var testsrc="test1";
-var testdest="test2";
-var testfilter="*.png";
+// var testsrc="test1";
+// var testdest="test2";
+// var testfilter="*.png";
 
-// var testsrc="..";
-// var testdest="g:/videos";
-// var testfilter="*.mkv";
+var testsrc="..";
+var testdest="g:/videos";
+var testfilter="*.mkv";
 
 var srcpath=testsrc;
 var destpath=testdest;
@@ -45,6 +45,9 @@ class FileHandler
                            //for src files and destination files
         this.readyCount=0; //count of file path arrays recieved from async functions.
                            //action begins at 2
+
+        this.fileStatuses=[]; //array that should include every file object that
+                              //we care about tracking completion status for
     }
 
     //public
@@ -67,6 +70,7 @@ class FileHandler
     {
         var srcFilesSet=new Set(this.filePaths.srcfiles.map((x,i)=>{
             this.filePaths.srcfiles[i]={path:x,base:path.basename(x)};
+            this.fileStatuses.push(this.filePaths.srcfiles[i]);
             return this.filePaths.srcfiles[i].base;
         }));
 
@@ -80,6 +84,7 @@ class FileHandler
             if (!srcFilesSet.has(destfiles[x].base))
             {
                 moveOutDestFiles.push(destfiles[x]);
+                this.fileStatuses.push(destfiles[x]);
             }
         }
 
@@ -101,7 +106,8 @@ class FileHandler
 
         files.forEach((x,i)=>{
             fs.rename(x.path,`${destpath}/delete/${x.base}`,(err)=>{
-                console.log(`${x.base} moved`);
+                x.status="moved";
+                this.renderLog();
             });
         });
     }
@@ -118,21 +124,49 @@ class FileHandler
                     {
                         if (err.code=="EEXIST")
                         {
-                            console.log(`${x.base} already exist`);
+                            x.status="already exist";
+                            this.renderLog();
                         }
 
                         else
                         {
-                            console.log(`${x.base} err`);
+                            x.status="err";
+                            this.renderLog();
                         }
 
                         return;
                     }
 
-                    console.log(`${x.base} copied`);
+                    x.status="copied";
+                    this.renderLog();
                 }
             );
         });
+    }
+
+    //uses fileStatuses to render the log
+    renderLog()
+    {
+        var res="";
+        var status;
+        var lastNewline="\n";
+        for (var x=0,l=this.fileStatuses.length;x<l;x++)
+        {
+            status="working...";
+            if (this.fileStatuses[x].status)
+            {
+                status=this.fileStatuses[x].status;
+            }
+
+            if (x==l-1)
+            {
+                lastNewline="";
+            }
+
+            res+=`${x+1} ${status} ${this.fileStatuses[x].base}${lastNewline}`;
+        }
+
+        logUpdate(res);
     }
 }
 
