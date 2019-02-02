@@ -3,9 +3,13 @@ const path=require("path");
 const program=require("commander");
 const fs=require("fs");
 
-var testsrc="test1";
-var testdest="test2";
-var testfilter="*.png";
+// var testsrc="test1";
+// var testdest="test2";
+// var testfilter="*.png";
+
+var testsrc="..";
+var testdest="g:/videos";
+var testfilter="*.mkv";
 
 var srcpath=testsrc;
 var destpath=testdest;
@@ -38,6 +42,8 @@ class FileHandler
     {
         this.filePaths={};
         this.readyCount=0;
+        this.totalFileActions;
+        this.currentFileAction=1;
     }
 
     //public
@@ -62,6 +68,8 @@ class FileHandler
             return path.basename(x);
         }));
 
+        this.totalFileActions=this.filePaths.srcfiles.length;
+
         //determine which files are not source files and shuold be moved away
         var moveOutDestFiles=[];
         var destfiles=this.filePaths.destfiles;
@@ -84,17 +92,17 @@ class FileHandler
     //move files into delete folder of destpath
     handleMoveOutFiles(files)
     {
+        this.totalFileActions+=files.length;
         if (!fs.existsSync(`${destpath}/delete`))
         {
             fs.mkdirSync(`${destpath}/delete`);
         }
 
-        console.log("moving...");
-
         files.forEach((x,i)=>{
             var bname=path.basename(x);
             fs.rename(x,`${destpath}/delete/${bname}`,(err)=>{
-                console.log(bname);
+                console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname} (moved)`);
+                this.currentFileAction++;
             });
         });
     }
@@ -102,7 +110,6 @@ class FileHandler
     //copy all srcfiles in filePaths to the destination
     mainCopyTransfer()
     {
-        console.log("copying...");
         var srcfiles=this.filePaths.srcfiles;
 
         srcfiles.forEach((x)=>{
@@ -113,7 +120,8 @@ class FileHandler
                     {
                         if (err.code=="EEXIST")
                         {
-                            console.log(`${bname} (already exist)`);
+                            console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname} (already exist)`);
+                            this.currentFileAction++;
                         }
 
                         else
@@ -124,7 +132,8 @@ class FileHandler
                         return;
                     }
 
-                    console.log(bname);
+                    console.log(`${this.currentFileAction}/${this.totalFileActions} ${bname}`);
+                    this.currentFileAction++;
                 }
             );
         });
