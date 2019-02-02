@@ -2,14 +2,15 @@ const glob=require("glob");
 const path=require("path");
 const program=require("commander");
 const fs=require("fs");
+const logUpdate=require("log-update");
 
-// var testsrc="test1";
-// var testdest="test2";
-// var testfilter="*.png";
+var testsrc="test1";
+var testdest="test2";
+var testfilter="*.png";
 
-var testsrc="..";
-var testdest="g:/videos";
-var testfilter="*.mkv";
+// var testsrc="..";
+// var testdest="g:/videos";
+// var testfilter="*.mkv";
 
 var srcpath=testsrc;
 var destpath=testdest;
