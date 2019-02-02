@@ -1,7 +1,7 @@
-const child_process=require("child_process");
 const glob=require("glob");
 const path=require("path");
 const program=require("commander");
+const fs=require("fs");
 
 var testsrc="test1";
 var testdest="test2";
@@ -58,7 +58,6 @@ class FileHandler
     //function executes once all async file recieves are done
     filesReady()
     {
-        console.log(this.filePaths);
         var srcFilesSet=new Set(this.filePaths.srcfiles.map((x,i)=>{
             return path.basename(x);
         }));
@@ -66,23 +65,40 @@ class FileHandler
         //determine which files are not source files and shuold be moved away
         var moveOutDestFiles=[];
         var destfiles=this.filePaths.destfiles;
-        var destfile;
         for (var x=0,l=destfiles.length;x<l;x++)
         {
-            destfile=path.basename(destfiles[x]);
-            if (!srcFilesSet.has(destfile))
+            if (!srcFilesSet.has(path.basename(destfiles[x])))
             {
-                moveOutDestFiles.push(destfile);
+                moveOutDestFiles.push(destfiles[x]);
             }
         }
 
         if (moveOutDestFiles.length)
         {
             console.log(moveOutDestFiles);
-            child_process.exec(`robocopy ${destpath} ${destpath}/delete ${moveOutDestFiles.join(" ")} /move`);
+            this.handleMoveOutFiles(moveOutDestFiles);
         }
 
-        child_process.exec(`robocopy ${srcpath} ${destpath} ${filters}`);
+        console.log(this.filePaths);
+    }
+
+    //move files into delete folder of destpath
+    handleMoveOutFiles(files)
+    {
+        if (!fs.existsSync(`${destpath}/delete`))
+        {
+            fs.mkdirSync(`${destpath}/delete`);
+        }
+
+        for (var x=0,l=files.length;x<l;x++)
+        {
+            fs.rename(files[x],`${destpath}/delete/${path.basename(files[x])}`,()=>{});
+        }
+    }
+
+    mainCopyTransfer()
+    {
+
     }
 }
 
