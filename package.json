@@ -4,6 +4,7 @@
   "main": "safemirror.js",
   "author": "risonakamo",
   "dependencies": {
+    "commander": "^2.19.0",
     "glob": "^7.1.3"
   }
 }

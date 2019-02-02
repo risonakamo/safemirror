@@ -1,14 +1,21 @@
 const child_process=require("child_process");
 const glob=require("glob");
 const path=require("path");
+const program=require("commander");
 
 var testsrc="test1";
 var testdest="test2";
-var testfilter="*.*";
+var testfilter="*.png";
 
-const srcpath=testsrc;
-const destpath=testdest;
-const filters=testfilter;
+var srcpath=testsrc;
+var destpath=testdest;
+var filters=testfilter;
+
+// program.arguments("<srcpath> <destpath> [filters]")
+// .action((sp,dp,fts)=>{
+//     console.log("a");
+// }).parse(process.argv);
+
 
 function main()
 {
@@ -23,6 +30,8 @@ function main()
     });
 }
 
+//main action class of program
+//recieves directory data and then does things
 class FileHandler
 {
     constructor()
