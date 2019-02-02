@@ -1,21 +1,24 @@
-const fs=require("fs");
 const child_process=require("child_process");
 const glob=require("glob");
 const path=require("path");
 
 var testsrc="test1";
 var testdest="test2";
-var testfilter="*.png";
+var testfilter="*.*";
+
+const srcpath=testsrc;
+const destpath=testdest;
+const filters=testfilter;
 
 function main()
 {
     var filehandler=new FileHandler;
 
-    glob(`${testsrc}/${testfilter}`,(err,files)=>{
+    glob(`${srcpath}/${filters}`,(err,files)=>{
         filehandler.recieveFiles(files,"srcfiles");
     });
 
-    glob(`${testdest}/${testfilter}`,(err,files)=>{
+    glob(`${destpath}/${filters}`,(err,files)=>{
         filehandler.recieveFiles(files,"destfiles");
     });
 }
@@ -46,6 +49,7 @@ class FileHandler
     //function executes once all async file recieves are done
     filesReady()
     {
+        console.log(this.filePaths);
         var srcFilesSet=new Set(this.filePaths.srcfiles.map((x,i)=>{
             return path.basename(x);
         }));
@@ -53,15 +57,23 @@ class FileHandler
         //determine which files are not source files and shuold be moved away
         var moveOutDestFiles=[];
         var destfiles=this.filePaths.destfiles;
+        var destfile;
         for (var x=0,l=destfiles.length;x<l;x++)
         {
-            if (!srcFilesSet.has(path.basename(destfiles[x])))
+            destfile=path.basename(destfiles[x]);
+            if (!srcFilesSet.has(destfile))
             {
-                moveOutDestFiles.push(destfiles[x]);
+                moveOutDestFiles.push(destfile);
             }
         }
 
-        console.log(moveOutDestFiles);
+        if (moveOutDestFiles.length)
+        {
+            console.log(moveOutDestFiles);
+            child_process.exec(`robocopy ${destpath} ${destpath}/delete ${moveOutDestFiles.join(" ")} /move`);
+        }
+
+        child_process.exec(`robocopy ${srcpath} ${destpath} ${filters}`);
     }
 }
 
