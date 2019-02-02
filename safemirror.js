@@ -41,10 +41,10 @@ class FileHandler
 {
     constructor()
     {
-        this.filePaths={};
-        this.readyCount=0;
-        this.totalFileActions;
-        this.currentFileAction=1;
+        this.filePaths={}; //object containing files paths
+                           //for src files and destination files
+        this.readyCount=0; //count of file path arrays recieved from async functions.
+                           //action begins at 2
     }
 
     //public
