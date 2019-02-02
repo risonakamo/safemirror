@@ -3,6 +3,7 @@ const path=require("path");
 const program=require("commander");
 const fs=require("fs");
 const logUpdate=require("log-update");
+const chalk=require("chalk");
 
 // var testsrc="test1";
 // var testdest="test2";
@@ -106,7 +107,7 @@ class FileHandler
 
         files.forEach((x,i)=>{
             fs.rename(x.path,`${destpath}/delete/${x.base}`,(err)=>{
-                x.status="moved";
+                x.status=chalk.yellow("moved");
                 this.renderLog();
             });
         });
@@ -124,20 +125,20 @@ class FileHandler
                     {
                         if (err.code=="EEXIST")
                         {
-                            x.status="already exist";
+                            x.status=chalk.blue("already exist");
                             this.renderLog();
                         }
 
                         else
                         {
-                            x.status="err";
+                            x.status=chalk.bgRed("err");
                             this.renderLog();
                         }
 
                         return;
                     }
 
-                    x.status="copied";
+                    x.status=chalk.green("copied");
                     this.renderLog();
                 }
             );
@@ -152,7 +153,7 @@ class FileHandler
         var lastNewline="\n";
         for (var x=0,l=this.fileStatuses.length;x<l;x++)
         {
-            status="working...";
+            status=chalk.magenta("working...");
             if (this.fileStatuses[x].status)
             {
                 status=this.fileStatuses[x].status;
@@ -163,7 +164,7 @@ class FileHandler
                 lastNewline="";
             }
 
-            res+=`${x+1} ${status} ${this.fileStatuses[x].base}${lastNewline}`;
+            res+=`${chalk.yellow.dim(x+1)} ${status} ${this.fileStatuses[x].base}${lastNewline}`;
         }
 
         logUpdate(res);
