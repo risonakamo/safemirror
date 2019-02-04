@@ -1,6 +1,6 @@
 {
   "name": "safemirror",
-  "version": "0.0.0",
+  "version": "1.0.0-beta",
   "main": "safemirror.js",
   "author": "risonakamo",
   "dependencies": {
