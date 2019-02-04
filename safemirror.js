@@ -5,26 +5,49 @@ const fs=require("fs");
 const logUpdate=require("log-update");
 const chalk=require("chalk");
 
-// var testsrc="test1";
-// var testdest="test2";
-// var testfilter="*.png";
+var srcpath; //main src directory for copying out of
+var destpath; //directory to copy into
+var filters; //file filter globs
 
-var testsrc="..";
-var testdest="g:/videos";
-var testfilter="*.mkv";
+//temporary preset storage
+//one day move it to an external file
+const presets={
+    "vids":{
+        src:"",
+        dest:"g:/videos",
+        filter:"*.mkv"
+    },
+    "test":{
+        src:"test1",
+        dest:"test2",
+        filter:"*.png"
+    }
+};
 
-var srcpath=testsrc;
-var destpath=testdest;
-var filters=testfilter;
+function commanderSetup()
+{
+    program.arguments("<srcpath> <destpath> [filters]");
+    program.option("-p --preset <preset>","use a preset");
 
-// program.arguments("<srcpath> <destpath> [filters]")
-// .action((sp,dp,fts)=>{
-//     console.log("a");
-// }).parse(process.argv);
+    program.action((inputsrc,inputdest,inputfilters="*.*")=>{
+        srcpath=inputsrc;
+        destpath=inputdest;
+        filters=inputfilters;
+    });
 
+    program.parse(process.argv);
+    main();
+}
 
 function main()
 {
+    if (program.preset)
+    {
+        srcpath=presets[program.preset].src;
+        destpath=presets[program.preset].dest;
+        filters=presets[program.preset].filter;
+    }
+
     var filehandler=new FileHandler;
 
     glob(`${srcpath}/${filters}`,(err,files)=>{
@@ -171,4 +194,5 @@ class FileHandler
     }
 }
 
-main();
+// main();
+commanderSetup();
