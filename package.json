@@ -1,8 +1,11 @@
 {
   "name": "safemirror",
-  "version": "1.0.1-beta",
+  "version": "1.0.2-beta",
   "main": "safemirror.js",
   "author": "risonakamo",
+  "bin": {
+    "safemirror": "safemirror.js"
+  },
   "dependencies": {
     "chalk": "^2.4.2",
     "commander": "^2.19.0",
