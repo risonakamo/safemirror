@@ -13,7 +13,7 @@ var filters; //file filter globs
 //one day move it to an external file
 const presets={
     "vids":{
-        src:"",
+        src:"c:/Users/khang/Desktop",
         dest:"g:/videos",
         filter:"*.mkv"
     },
@@ -111,6 +111,8 @@ class FileHandler
                 this.fileStatuses.push(destfiles[x]);
             }
         }
+
+        this.renderLog();
 
         if (moveOutDestFiles.length)
         {
