@@ -15,7 +15,7 @@ var filters; //file filter globs
 //one day move it to an external file
 const presets={
     "vids":{
-        src:"c:/Users/khang/Desktop",
+        src:"send to drive",
         dest:"g:/videos",
         filter:"*.mkv"
     },
