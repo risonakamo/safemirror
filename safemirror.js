@@ -30,6 +30,7 @@ function commanderSetup()
 {
     program.arguments("<srcpath> <destpath> [filters]");
     program.option("-p --preset <preset>","use a preset");
+    program.option("-d --move-delete","use deleted files for move-back");
 
     program.action((inputsrc,inputdest,inputfilters="*.*")=>{
         srcpath=inputsrc;
@@ -59,6 +60,21 @@ function main()
     glob(`${destpath}/${filters}`,(err,files)=>{
         filehandler.recieveFiles(files,"destfiles");
     });
+
+    //if move delete is enabled, scan the delete folder for deleted files
+    //applicable for move-back
+    if (program.moveDelete)
+    {
+        glob(`${destpath}/delete/${filters}`,(err,files)=>{
+            filehandler.recieveFiles(files,"deletefiles");
+        });
+    }
+
+    //otherwise set deletefiles to empty
+    else
+    {
+        filehandler.recieveFiles([],"deletefiles");
+    }
 }
 
 //main action class of program
@@ -85,7 +101,8 @@ class FileHandler
         this.filePaths[whichFolder]=files;
         this.readyCount++;
 
-        if (this.readyCount==2)
+        //wait for 3 files to come in, srcfiles, destfiles, and deletefiles
+        if (this.readyCount==3)
         {
             this.filesReady();
         }
@@ -145,7 +162,24 @@ class FileHandler
     {
         var srcfiles=this.filePaths.srcfiles;
 
+        //set of deleted files' basenames
+        var deleteFilesSet=new Set(this.filePaths.deletefiles.map((x)=>{
+            return path.basename(x);
+        }));
+
         srcfiles.forEach((x)=>{
+            //check deleted files set to see if any files about to be copied are
+            //in the deleted files set. if there are, move it instead of copying
+            if (deleteFilesSet.has(x.base))
+            {
+                fs.rename(`${destpath}/delete/${x.base}`,`${destpath}/${x.base}`,(err)=>{
+                    x.status=chalk.yellowBright("move-back");
+                    this.renderLog();
+                });
+
+                return;
+            }
+
             fs.copyFile(x.path,`${destpath}/${x.base}`,fs.constants.COPYFILE_EXCL,
                 (err)=>{
                     if (err)
