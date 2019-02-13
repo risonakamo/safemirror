@@ -51,6 +51,18 @@ function main()
         filters=presets[program.preset].filter;
     }
 
+    if (!fs.existsSync(srcpath))
+    {
+        console.log("src path doesn't exist");
+        return;
+    }
+
+    if (!fs.existsSync(destpath))
+    {
+        console.log("dest path doesn't exist");
+        return;
+    }
+
     var filehandler=new FileHandler;
 
     glob(`${srcpath}/${filters}`,(err,files)=>{
